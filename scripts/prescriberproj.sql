@@ -72,6 +72,7 @@
 	
 
    --b. Building off of the query you wrote for part a, determine whether more was spent (total_drug_cost) on opioids or on antibiotics. Hint: Format the total costs as MONEY for easier comparision.
+  -- what are other things you can cast?
   
 SELECT CAST(SUM(total_drug_cost) AS money) AS total_opioid_cost, 
 			(SELECT CAST(SUM(total_drug_cost) AS money) AS total_antibiotic_cost
@@ -95,18 +96,33 @@ GROUP BY opioid_drug_flag, antibiotic_drug_flag
 	WHERE state = 'TN';
 	
 	--b. Which cbsa has the largest combined population? Which has the smallest? Report the CBSA name and total population.
-	SELECT cbsa, population
+	SELECT cbsa, SUM(population) AS largest_population
 	FROM cbsa
 	INNER JOIN population
 	USING(fipscounty)
-	ORDER BY population ASC
-	LIMIT 1;
+	GROUP BY cbsa
+	ORDER BY largest_population DESC
+	LIMIT 1
 
-	SELECT cbsa, population
+	SELECT cbsa, SUM(population) AS smallest_population
 	FROM cbsa
 	INNER JOIN population
 	USING(fipscounty)
-	ORDER BY population DESC		
-	LIMIT 1;		
-	-- still working
+	GROUP BY cbsa
+	ORDER BY smallest_population ASC
+	LIMIT 1
+
+--still working
+	
 	--c. What is the largest (in terms of population) county which is not included in a CBSA? Report the county name and population.
+	SELECT county, population
+	FROM fips_county
+	INNER JOIN population
+	USING(fipscounty)
+	WHERE fipscounty NOT IN 
+			(SELECT fipscounty
+			 FROM cbsa)
+	ORDER BY population DESC	
+	LIMIT 1;
+	
+	
