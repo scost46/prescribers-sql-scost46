@@ -85,7 +85,7 @@ FROM drug
 INNER JOIN prescription
 USING(drug_name)
 WHERE opioid_drug_flag = 'Y'
-GROUP BY opioid_drug_flag, antibiotic_drug_flag
+GROUP BY opioid_drug_flag, antibiotic_drug_flag;
 
 --5. 
     --a. How many CBSAs are in Tennessee? **Warning:** The cbsa table contains information for all states, not just Tennessee.
@@ -102,7 +102,7 @@ GROUP BY opioid_drug_flag, antibiotic_drug_flag
 	USING(fipscounty)
 	GROUP BY cbsa
 	ORDER BY largest_population DESC
-	LIMIT 1
+	LIMIT 1;
 
 	SELECT cbsa, SUM(population) AS smallest_population
 	FROM cbsa
@@ -110,7 +110,7 @@ GROUP BY opioid_drug_flag, antibiotic_drug_flag
 	USING(fipscounty)
 	GROUP BY cbsa
 	ORDER BY smallest_population ASC
-	LIMIT 1
+	LIMIT 1;
 
 --still working
 	
@@ -124,5 +124,28 @@ GROUP BY opioid_drug_flag, antibiotic_drug_flag
 			 FROM cbsa)
 	ORDER BY population DESC	
 	LIMIT 1;
+
+--6. 
+    --a. Find all rows in the prescription table where total_claims is at least 3000. Report the drug_name and the total_claim_count.
+	SELECT drug_name, total_claim_count
+	FROM prescription 
+	WHERE total_claim_count >= 3000
+	ORDER BY total_claim_count ASC;
 	
+	--b. For each instance that you found in part a, add a column that indicates whether the drug is an opioid.
+	SELECT drug_name, total_claim_count, opioid_drug_flag
+	FROM prescription 
+	INNER JOIN drug
+	USING(drug_name)
+	WHERE total_claim_count >= 3000
+	ORDER BY total_claim_count ASC;
 	
+	--c. Add another column to you answer from the previous part which gives the prescriber first and last name associated with each row.
+	SELECT nppes_provider_first_name, nppes_provider_last_org_name, drug_name, total_claim_count, opioid_drug_flag
+	FROM drug
+	INNER JOIN prescription
+	USING(drug_name)
+	INNER JOIN prescriber
+	USING(npi)
+	WHERE total_claim_count >= 3000
+	ORDER BY total_claim_count ASC
