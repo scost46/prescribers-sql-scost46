@@ -164,18 +164,19 @@ GROUP BY opioid_drug_flag, antibiotic_drug_flag;
 	AND nppes_provider_city = 'NASHVILLE'
 	AND opioid_drug_flag = 'Y';
 
-	--b. Next, report the number of claims per drug per prescriber. Be sure to include all combinations, whether or not the prescriber had any claims. You should report the npi, the drug name, and the number of claims (total_claim_count).
-	SELECT npi, drug_name
-	FROM prescriber
-	CROSS JOIN drug
-	WHERE specialty_description ILIKE 'Pain Management'
-	AND nppes_provider_city = 'NASHVILLE'
-	AND opioid_drug_flag = 'Y';
+	--b/c. Next, report the number of claims per drug per prescriber. Be sure to include all combinations, whether or not the prescriber had any claims. You should report the npi, the drug name, and the number of claims (total_claim_count).
+		SELECT scribe.npi, d.drug_name, COALESCE(total_claim_count,0) total_claim_count
+		FROM prescriber AS scribe
+		CROSS JOIN drug AS d
+		FULL JOIN prescription AS script
+		ON scribe.npi = script.npi
+		AND d.drug_name = script.drug_name
+		WHERE specialty_description ILIKE 'Pain Management'
+		AND nppes_provider_city = 'NASHVILLE'
+		AND opioid_drug_flag = 'Y'
+		ORDER BY total_claim_count DESC;
 
-	WITH script AS (SELECT total_claim_count
-				   FROM prescription)
+
 	
 	
-	--c. Finally, if you have not done so already, fill in any missing values for total_claim_count with 0. Hint - Google the COALESCE function.
-	
-	--still working on q7, do not believe my results are correct
+
